@@ -1,0 +1,10 @@
+# Created by .ignore support plugin (hsz.mobi)
+.classpath
+.idea/
+.project
+.settings/
+*.mp4
+*.pdf
+target/
+src/main/scala/forcomp/AnagramsTests.sc
+.gitignore
