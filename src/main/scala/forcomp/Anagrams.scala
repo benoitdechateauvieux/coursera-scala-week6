@@ -169,5 +169,20 @@ object Anagrams {
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def sentenceAnagrams(sentence: Sentence): List[Sentence] = ???
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] = sentenceAnagramsOcc(sentenceOccurrences(sentence))
+
+  val dico:Map[Occurrences, List[Word]] = dictionaryByOccurrences withDefaultValue List[Word]()
+
+  def sentenceAnagramsOcc(occurrences: Occurrences): List[Sentence] = {
+    occurrences match {
+      case List() => List(List())
+      case occs =>
+        val combs: List[Occurrences] = combinations(occs)
+        for {
+          occ: Occurrences <- combs
+          word: Word <- dico(occ)
+          sentence <- sentenceAnagramsOcc(subtract(occs, wordOccurrences(word)))
+        } yield word :: sentence
+    }
+  }
 }
