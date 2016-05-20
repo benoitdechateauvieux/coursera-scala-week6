@@ -84,7 +84,30 @@ object Anagrams {
    *  Note that the order of the occurrence list subsets does not matter -- the subsets
    *  in the example above could have been displayed in some other order.
    */
-  def combinations(occurrences: Occurrences): List[Occurrences] = ???
+  def combinations(occurrences: Occurrences): List[Occurrences] = {
+    val pairs:Occurrences = for {
+      occurrence <- occurrences
+      (char, int) = occurrence
+      possibleOcc <- 0 to int
+    } yield (char, possibleOcc)
+
+    val pairedOccs:Map[Char, List[(Char, Int)]] = pairs groupBy (x => {val (char, int) = x; char})
+    val pairedOccsSorted = pairedOccs.toList.sortBy(_._1)
+    val listOccs:List[List[(Char, Int)]] = pairedOccsSorted map (x => {val (char, list) = x; list})
+
+    computeCombinations(listOccs)
+  }
+
+  def computeCombinations(groupedOcc: List[Occurrences]): List[Occurrences] = {
+    groupedOcc match {
+      case Nil => List(List())
+      case combs :: tail =>
+        for {
+          comb <- combs
+          queue <- computeCombinations(tail)
+        } yield comb :: queue  filter (_._2 > 0)
+    }
+  }
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
    *
@@ -96,7 +119,15 @@ object Anagrams {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = ???
+  def subtract(x: Occurrences, y: Occurrences): Occurrences = {
+    val yDefault = y.toMap withDefaultValue 0
+    x.foldLeft(List[(Char, Int)]())((acc, kv) => {
+      val (char, occ) = kv
+      val newOcc = occ - yDefault.apply(char)
+      if (newOcc < 0) throw new IllegalArgumentException("Illegal y for " +char)
+      if (newOcc==0) acc else (char, newOcc) :: acc
+    }) sortBy(_._1)
+  }
 
   /** Returns a list of all anagram sentences of the given sentence.
    *
